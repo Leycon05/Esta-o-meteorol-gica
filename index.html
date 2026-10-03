@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="theme-color" content="#111a18" />
+		<meta name="description" content="Painel de leituras ambientais da estação ESP32 com sensores DHT22, BMP280, LDR e MQ-135." />
+		<meta name="api-base" content="/api" />
+		<meta name="station-id" content="1" />
+		<meta name="data-mode" content="mock" />
+		<title>Estação | Monitoramento meteorológico</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+		<link rel="stylesheet" href="css/style.css" />
+		<script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+		<script defer src="js/api.js"></script>
+		<script defer src="js/dashboard.js"></script>
+		<script defer src="js/charts.js"></script>
+		<script defer src="js/mock-data.js"></script>
+		<script defer src="js/app.js"></script>
+	</head>
+	<body>
+		<div class="app-shell">
+			<header class="topbar">
+				<a class="brand" href="#inicio" aria-label="Estação, início">
+					<span class="brand-mark" aria-hidden="true"><i data-lucide="cloud-sun"></i></span>
+					<span class="brand-name">estação<span>.</span></span>
+				</a>
+
+				<div class="topbar-center">
+					<span class="live-indicator" id="telemetry-indicator"><span></span> DADOS FICTÍCIOS · DEMO</span>
+					<span class="topbar-divider" aria-hidden="true"></span>
+						<span class="topbar-date" id="topbar-date">ESTAÇÃO 01 · ESP32</span>
+				</div>
+
+					<div class="topbar-station"><i data-lucide="radio" aria-hidden="true"></i><span id="connection-label">Modo demonstração</span></div>
+			</header>
+
+			<main id="inicio" class="dashboard">
+				<section class="page-heading" aria-labelledby="page-title">
+					<div>
+						<p class="eyebrow">ESTAÇÃO METEOROLÓGICA <span>/</span> PAINEL</p>
+						<h1 id="page-title">Visão geral</h1>
+					</div>
+					<div class="heading-actions">
+						<span class="updated-at" id="updated-at">Aguardando atualização</span>
+						<button class="icon-button" id="refresh-button" type="button" aria-label="Atualizar dados" title="Atualizar dados">
+							<i data-lucide="refresh-cw" aria-hidden="true"></i>
+						</button>
+					</div>
+				</section>
+
+				<div class="notice" id="notice" role="status" hidden>
+					<i data-lucide="circle-alert" aria-hidden="true"></i>
+					<span id="notice-message"></span>
+					<button class="notice-retry" id="retry-button" type="button">Tentar novamente</button>
+				</div>
+
+				<section class="overview-grid" aria-label="Condições meteorológicas atuais">
+					<article class="current-panel panel">
+						<div class="current-topline">
+							<div class="location-line">
+								<i data-lucide="map-pin" aria-hidden="true"></i>
+								<div>
+									<h2 id="location-name">Estação 01</h2>
+									<p id="location-region">ESP32 · aguardando API</p>
+								</div>
+							</div>
+								<span class="station-tag" id="station-state"><span></span> AGUARDANDO API</span>
+						</div>
+
+						<div class="current-main">
+							<div class="temperature-block">
+								<p class="condition-label">TEMPERATURA DO AR · DHT22</p>
+								<div class="temperature-line"><span id="current-temperature">--</span><sup>°C</sup></div>
+								<p class="feels-like">Última leitura <strong id="reading-time">--</strong></p>
+							</div>
+							<div class="weather-art" aria-hidden="true">
+								<div class="weather-orbit orbit-one"></div>
+								<div class="weather-orbit orbit-two"></div>
+								<i data-lucide="thermometer"></i>
+							</div>
+						</div>
+
+						<div class="current-footer">
+							<div class="sun-times"><span><i data-lucide="cpu" aria-hidden="true"></i><span>Aquisição <strong>ESP32</strong></span></span><span><i data-lucide="database" aria-hidden="true"></i><span>Origem <strong id="station-origin">Dados fictícios</strong></span></span></div>
+							<span class="coordinates" id="coordinates">--° / --°</span>
+						</div>
+					</article>
+
+					<div class="metrics-grid">
+						<article class="metric-card panel metric-humidity">
+							<div class="metric-heading"><span class="metric-icon"><i data-lucide="droplets" aria-hidden="true"></i></span><span class="metric-label">Umidade</span></div>
+							<div class="metric-value"><span id="humidity">--</span><sup>%</sup></div>
+							<p class="metric-note">Umidade relativa · DHT22</p>
+							<div class="meter"><span id="humidity-meter"></span></div>
+						</article>
+						<article class="metric-card panel metric-pressure">
+							<div class="metric-heading"><span class="metric-icon"><i data-lucide="gauge" aria-hidden="true"></i></span><span class="metric-label">Pressão atmosférica</span></div>
+							<div class="metric-value"><span id="pressure">--</span><sup id="pressure-unit">hPa</sup></div>
+							<p class="metric-note">Pressão barométrica · BMP280</p>
+						</article>
+						<article class="metric-card panel metric-light">
+							<div class="metric-heading"><span class="metric-icon"><i data-lucide="sun" aria-hidden="true"></i></span><span class="metric-label">Luz ambiente</span></div>
+							<div class="metric-value"><span id="light-reading">--</span><sup id="light-unit">ADC</sup></div>
+							<p class="metric-note">Leitura analógica · LDR</p>
+						</article>
+						<article class="metric-card panel metric-gas">
+								<div class="metric-heading"><span class="metric-icon"><i data-lucide="flask-conical" aria-hidden="true"></i></span><span class="metric-label">Qualidade do ar</span></div>
+							<div class="metric-value"><span id="gas-reading">--</span><sup id="gas-unit">ADC</sup></div>
+							<p class="metric-note" id="gas-note">Resposta analógica · MQ-135</p>
+						</article>
+					</div>
+				</section>
+
+				<section class="forecast-grid" aria-label="Histórico das medições">
+					<article class="chart-panel panel">
+						<div class="section-heading chart-heading">
+							<div>
+								<p class="eyebrow" id="history-kicker">SÉRIE DE DEMONSTRAÇÃO</p>
+								<h2>Histórico de medições</h2>
+							</div>
+							<div class="chart-controls">
+								<div class="segmented-control metric-control" role="group" aria-label="Sensor">
+									<button type="button" class="segment is-active" data-metric="temperatura" aria-pressed="true">Temp.</button>
+									<button type="button" class="segment" data-metric="umidade" aria-pressed="false">Umidade</button>
+									<button type="button" class="segment" data-metric="pressao" aria-pressed="false">Pressão</button>
+									<button type="button" class="segment" data-metric="luz_adc" aria-pressed="false">Luz</button>
+									<button type="button" class="segment" data-metric="mq135_adc" aria-pressed="false">Qualidade do ar</button>
+								</div>
+								<div class="segmented-control period-control" role="group" aria-label="Período do histórico">
+									<button type="button" class="segment is-active" data-period="24h" aria-pressed="true">24 h</button>
+									<button type="button" class="segment" data-period="7d" aria-pressed="false">7 dias</button>
+									<button type="button" class="segment" data-period="30d" aria-pressed="false">30 dias</button>
+								</div>
+							</div>
+						</div>
+						<div class="chart-summary"><span id="chart-summary-value">--</span><span id="chart-summary-label">Aguardando leituras da estação</span></div>
+						<div class="chart-wrap"><canvas id="weather-chart" role="img" aria-label="Gráfico histórico das medições da estação meteorológica"></canvas><div class="chart-empty" id="chart-empty">Histórico aguardando dados válidos</div></div>
+						<p class="chart-footnote"><span></span> Apenas medições válidas <span class="footnote-separator">·</span> unidade <span id="chart-unit">°C</span></p>
+					</article>
+
+					<article class="hourly-panel panel">
+						<div class="section-heading">
+							<div><p class="eyebrow">RESUMO DO PERÍODO</p><h2>Estatísticas</h2></div>
+							<i class="heading-icon" data-lucide="chart-no-axes-combined" aria-hidden="true"></i>
+						</div>
+						<div class="stats-list" id="stats-list" aria-live="polite">
+							<div class="stat-row"><span>Leituras válidas</span><strong id="valid-count">--</strong></div>
+							<div class="stat-row"><span>Média</span><strong id="period-average">--</strong></div>
+							<div class="stat-row"><span>Mínima</span><strong id="period-min">--</strong></div>
+							<div class="stat-row"><span>Máxima</span><strong id="period-max">--</strong></div>
+							<div class="stat-row"><span>Última atualização</span><strong id="last-update">--</strong></div>
+						</div>
+					</article>
+				</section>
+
+				<section class="location-grid" aria-label="Localização e integridade da estação">
+					<article class="map-panel panel">
+						<div class="section-heading map-heading">
+							<div><p class="eyebrow">GEORREFERENCIAMENTO</p><h2>Localização da estação</h2></div>
+							<span class="coordinates" id="map-coordinates">--° / --°</span>
+						</div>
+						<div class="map-frame" id="map-frame">
+							<div class="map-empty" id="map-empty"><i data-lucide="map-pinned" aria-hidden="true"></i><span>Coordenadas da estação indisponíveis</span></div>
+						</div>
+					</article>
+					<article class="integrity-panel panel">
+						<div class="section-heading">
+							<div><p class="eyebrow">QUALIDADE DA AQUISIÇÃO</p><h2>Estado dos dados</h2></div>
+							<i class="heading-icon" data-lucide="shield-check" aria-hidden="true"></i>
+						</div>
+						<div class="integrity-status" id="integrity-status"><span></span><strong>Aguardando conexão</strong></div>
+						<p class="integrity-copy" id="integrity-copy">As leituras são fornecidas pela API do projeto e devem ser validadas antes da persistência.</p>
+						<div class="integrity-detail"><span>Identificação</span><strong id="station-id">Estação 01</strong></div>
+						<div class="integrity-detail"><span>Registros descartados</span><strong id="rejected-count">--</strong></div>
+					</article>
+				</section>
+
+				<footer class="page-footer">
+					<span>Monitoramento ambiental <span>·</span> ESP32 + API Python</span>
+					<span id="footer-coordinates">ESTAÇÃO 01 <span>·</span> --° / --°</span>
+				</footer>
+			</main>
+		</div>
+	</body>
+</html>
